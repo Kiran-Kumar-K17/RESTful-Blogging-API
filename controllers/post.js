@@ -2,8 +2,36 @@ import Post from "../models/post.js";
 
 async function getAllData(req, res) {
   try {
-    const posts = await Post.find({});
-    res.status(200).json({ success: true, data: posts });
+    const queryObj = { ...req.query };
+    const excludedFields = ["page", "sort", "limit", "field"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+    let query = Post.find(queryObj);
+
+    const sortBy = req.query.sort || "-createdAt";
+    query = query.sort(sortBy);
+
+    if (req.query.field) {
+      const fields = req.query.field.split(",").join(" ");
+      query = query.select(fields);
+    } else {
+      query = query.select("-__v");
+    }
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 10;
+    const skip = (page - 1) * limit;
+    query = query.skip(skip).limit(limit);
+
+    const posts = await query;
+    const totalPosts = await Post.countDocuments(queryObj);
+    res.status(200).json({
+      success: true,
+      results: posts.length,
+      data: posts,
+      pagination: {
+        totalPosts,
+        currentPage: page,
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
