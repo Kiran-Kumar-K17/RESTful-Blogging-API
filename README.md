@@ -9,6 +9,7 @@ A professional-grade **RESTful Blogging API** built with Node.js, Express, and M
 ---
 
 ## 📋 Table of Contents
+
 - [Tech Stack](#-tech-stack)
 - [Key Features](#-key-features)
 - [API Endpoints](#-api-endpoints)
@@ -31,26 +32,29 @@ A professional-grade **RESTful Blogging API** built with Node.js, Express, and M
 ## ✨ Key Features
 
 ### 1. 📝 Full CRUD Operations
+
 Complete resource management for blog posts with all standard operations:
+
 - Create new posts
 - Read single or multiple posts
 - Update existing posts
 - Delete posts
 
 ### 2. 🔍 Advanced Querying Pipeline
+
 A custom-built URL processing pipeline that handles complex data requests:
 
 - **Filtering:** Query by any schema field
   - Example: `?category=coding&author=John`
-  
 - **Sorting:** Dynamic result ordering with ascending/descending support
   - Example: `?sort=-createdAt,title` (newest first, then alphabetically)
-  
 - **Field Selection:** Optimize bandwidth by requesting only needed fields
   - Example: `?field=title,author,createdAt`
 
 ### 3. 📄 Professional Pagination
+
 Efficient handling of large datasets to ensure optimal performance:
+
 - Configurable page size with `limit` parameter
 - Page navigation with `page` parameter
 - Automatic `skip` calculation
@@ -63,30 +67,33 @@ Efficient handling of large datasets to ensure optimal performance:
 
 ## 🚦 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| **GET** | `/posts` | Retrieve all posts with filtering, sorting & pagination |
-| **GET** | `/posts/:id` | Retrieve a single post by MongoDB ID |
-| **POST** | `/posts` | Create a new blog post |
-| **PATCH** | `/posts/:id` | Update specific fields of an existing post |
-| **DELETE** | `/posts/:id` | Delete a post from the database |
+| Method     | Endpoint     | Description                                             |
+| ---------- | ------------ | ------------------------------------------------------- |
+| **GET**    | `/posts`     | Retrieve all posts with filtering, sorting & pagination |
+| **GET**    | `/posts/:id` | Retrieve a single post by MongoDB ID                    |
+| **POST**   | `/posts`     | Create a new blog post                                  |
+| **PATCH**  | `/posts/:id` | Update specific fields of an existing post              |
+| **DELETE** | `/posts/:id` | Delete a post from the database                         |
 
 ---
 
 ## 🧪 Usage Examples
 
 ### Complex Query Example
+
 ```http
 GET /posts?category=coding&sort=-createdAt&page=1&limit=5&field=title,author
 ```
 
 This query will:
+
 - Filter posts where category equals "coding"
 - Sort by creation date (newest first)
 - Return page 1 with 5 results
 - Include only title and author fields
 
 ### Success Response Structure
+
 ```json
 {
   "success": true,
@@ -107,6 +114,7 @@ This query will:
 ```
 
 ### Create Post Example
+
 ```http
 POST /posts
 Content-Type: application/json
@@ -124,6 +132,7 @@ Content-Type: application/json
 ## ⚙️ Setup Instructions
 
 ### Prerequisites
+
 - Node.js (v14 or higher)
 - MongoDB (local installation or MongoDB Atlas account)
 - npm or yarn package manager
@@ -131,18 +140,21 @@ Content-Type: application/json
 ### Installation Steps
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/yourusername/backend-journey.git
 cd backend-journey
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Configure environment variables**
-Create a `.env` file in the root directory:
+   Create a `.env` file in the root directory:
+
 ```env
 PORT=5000
 DATABASE_URL=mongodb://localhost:27017/blog-api
@@ -151,6 +163,7 @@ DATABASE_URL=mongodb://localhost:27017/blog-api
 ```
 
 4. **Start the server**
+
 ```bash
 # Development mode
 npm start
@@ -160,13 +173,14 @@ npm run start:prod
 ```
 
 5. **Verify the setup**
-The server should be running at `http://localhost:5000`
+   The server should be running at `http://localhost:5000`
 
 ---
 
 ## 🧪 Testing
 
 Import the provided Postman collection to test all endpoints:
+
 1. Open Postman
 2. Import the collection from `/postman/blog-api.postman_collection.json`
 3. Set the base URL to `http://localhost:5000`
