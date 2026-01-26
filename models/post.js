@@ -12,8 +12,9 @@ const postSchema = Schema(
       required: [true, "Content cannot be empty"],
     },
     author: {
-      type: String,
-      required: true,
+      type: mongoose.Schema.ObjectId,
+      ref: "User", // This MUST match the name in your User model: mongoose.model("User", ...)
+      required: [true, "A post must belong to a user"],
     },
     tags: {
       type: [String],

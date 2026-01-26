@@ -5,7 +5,10 @@ async function getAllData(req, res) {
     const queryObj = { ...req.query };
     const excludedFields = ["page", "sort", "limit", "field"];
     excludedFields.forEach((el) => delete queryObj[el]);
-    let query = Post.find(queryObj);
+    let query = Post.find(queryObj).populate({
+      path: "author",
+      select: "name email", // Only get the public info
+    });
 
     const sortBy = req.query.sort || "-createdAt";
     query = query.sort(sortBy);
@@ -39,8 +42,10 @@ async function getAllData(req, res) {
 
 async function postData(req, res) {
   try {
-    const data = req.body;
-    const newPost = await Post.create(data);
+    const newPost = await Post.create({
+      ...req.body,
+      author: req.user._id, // req.user was set by your 'protect' middleware!
+    });
     res.status(201).json({ success: true, data: newPost });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -63,12 +68,19 @@ async function getById(req, res) {
 
 async function deleteData(req, res) {
   try {
-    const deletedPost = await Post.findByIdAndDelete(req.params.id);
-    if (!deletedPost) {
+    const post = await Post.findById(req.params.id);
+    if (!post) {
       return res
         .status(404)
         .json({ success: false, message: "Post not found" });
     }
+    if (post.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You do not have permission to delete this post",
+      });
+    }
+    await Post.findByIdAndDelete(req.params.id);
     res
       .status(200)
       .json({ success: true, message: "Post deleted successfully" });
