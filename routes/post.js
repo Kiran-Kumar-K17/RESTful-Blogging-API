@@ -6,14 +6,15 @@ import {
   deleteData,
   updateData,
 } from "../controllers/post.js";
+import { protect } from "../controllers/authController.js";
 const router = Router();
 
-router.route("/").get(getAllData).post(postData);
-router
-  .route("/:id")
-  .get(getById)
-  .delete(deleteData)
-  .patch(updateData)
-  .put(updateData);
+router.get("/", getAllData);
+
+// Only logged-in users can Create, Update, or Delete!
+router.post("/", protect, postData);
+router.patch("/:id", protect, updateData);
+router.delete("/:id", protect, deleteData);
+router.get("/:id", protect, getById);
 
 export default router;

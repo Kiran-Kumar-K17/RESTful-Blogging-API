@@ -1,11 +1,53 @@
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
+import { promisify } from "util";
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
+async function protect(req, res, next) {
+  try {
+    let token;
+
+    // 1) Check if token is in the headers (Authorization: Bearer <token>)
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        message: "You are not logged in! Please login to get access.",
+      });
+    }
+
+    // 2) Verification of token
+    // We use promisify to make jwt.verify work with async/await
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return res.status(401).json({
+        message: "The user belonging to this token no longer exists.",
+      });
+    }
+
+    // 4) GRANT ACCESS TO PROTECTED ROUTE
+    // We put the user on the 'req' object so other functions can use it
+    req.user = currentUser;
+    next();
+  } catch (error) {
+    res
+      .status(401)
+      .json({ success: false, message: "Invalid token. Please login again." });
+  }
+}
 
 async function registerUser(req, res) {
   try {
@@ -70,4 +112,4 @@ async function loginUser(req, res) {
     res.status(500).json({ success: false, error: error.message });
   }
 }
-export { registerUser, loginUser };
+export { registerUser, loginUser, protect };
