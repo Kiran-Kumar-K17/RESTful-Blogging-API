@@ -31,6 +31,10 @@ const postSchema = Schema(
       enum: ["draft", "published", "archived"],
       default: "draft",
     },
+    coverImage: {
+      type: String,
+      default: "default-cover.jpg",
+    },
   },
   {
     timestamps: true,

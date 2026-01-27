@@ -1,4 +1,6 @@
 import Post from "../models/post.js";
+import path from "path"; // This is the one you are missing!
+import fs from "fs"; // Needed for fs.unlink and fs.existsSync
 
 async function getAllData(req, res) {
   try {
@@ -42,6 +44,8 @@ async function getAllData(req, res) {
 
 async function postData(req, res) {
   try {
+    if (req.file && !req.body.coverImage)
+      req.body.coverImage = req.file.filename;
     const newPost = await Post.create({
       ...req.body,
       author: req.user._id, // req.user was set by your 'protect' middleware!
@@ -68,27 +72,63 @@ async function getById(req, res) {
 
 async function deleteData(req, res) {
   try {
+    console.log("1. Delete request received for ID:", req.params.id);
+
     const post = await Post.findById(req.params.id);
+
     if (!post) {
+      console.log("2. Error: Post not found in database");
       return res
         .status(404)
         .json({ success: false, message: "Post not found" });
     }
+
+    console.log("3. Post found. CoverImage value is:", post.coverImage);
+
+    // Ownership Check
     if (post.author.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to delete this post",
-      });
+      console.log("4. Error: User is not the owner");
+      return res
+        .status(403)
+        .json({ success: false, message: "Permission denied" });
     }
+
+    // THE DELETION LOGIC
+    if (post.coverImage) {
+      console.log("5. Entering Image Deletion Block...");
+
+      const imagePath = path.join(
+        process.cwd(),
+        "public",
+        "image",
+        "posts",
+        post.coverImage,
+      );
+      console.log("6. Target path:", imagePath);
+
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+        console.log("7. ✅ File physically deleted!");
+      } else {
+        console.log("7. ❌ File does NOT exist at that path.");
+      }
+    } else {
+      console.log(
+        "5. ⚠️ Skip: No coverImage field found on this post document.",
+      );
+    }
+
     await Post.findByIdAndDelete(req.params.id);
+    console.log("8. Post deleted from Database. Sending response.");
+
     res
       .status(200)
       .json({ success: true, message: "Post deleted successfully" });
   } catch (error) {
+    console.log("🚨 CATCH ERROR:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 }
-
 async function updateData(req, res) {
   try {
     const { id } = req.params;
