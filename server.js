@@ -1,17 +1,57 @@
 import express from "express";
+import path from "path";
+import helmet from "helmet"; // Security headers
+import rateLimit from "express-rate-limit"; // Prevents DDoS
 import { connectMongoDB } from "./MyDB.js";
 import postRoute from "./routes/post.js";
 import userRoute from "./routes/user.js";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const app = express();
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
+const DB = process.env.DATABASE_URL;
 
-connectMongoDB("mongodb://127.0.0.1:27017/MyDB").then(() =>
-  console.log("MongoDB Connected Successfully"),
-);
-app.use(express.json());
-app.use("/post", postRoute);
-app.use("/user", userRoute);
+// 1. CONNECT DATABASE
+connectMongoDB(DB).then(() => console.log("MongoDB Connected Successfully"));
+
+// 2. GLOBAL MIDDLEWARES (Security & Parsing)
+app.use(helmet()); // Sets various HTTP headers for security
+
+// Rate Limiter: 100 requests per hour per IP
+const limiter = rateLimit({
+  max: 10,
+  windowMs: 60 * 60 * 100,
+  message: "Too many requests from this IP, please try again in an hour!",
+});
+app.use("/api", limiter);
+
+app.use(express.json({ limit: "10kb" })); // Prevents large payload attacks
+app.use(express.static(path.join(process.cwd(), "public"))); // Serve images
+
+// 3. ROUTES
+app.use("/api/v1/post", postRoute);
+app.use("/api/v1/user", userRoute);
+
+// 4. FALLBACK ROUTE (Handle 404)
+app.all("*all", (req, res, next) => {
+  const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+  err.statusCode = 404;
+  next(err);
+});
+
+// 5. GLOBAL ERROR HANDLING MIDDLEWARE
+app.use((err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || "error";
+
+  res.status(err.statusCode).json({
+    success: false,
+    status: err.status,
+    message: err.message,
+    // stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+  });
+});
+
 app.listen(PORT, () => console.log(`Server Started at Port:${PORT}`));
