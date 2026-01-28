@@ -25,14 +25,14 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 100,
   message: "Too many requests from this IP, please try again in an hour!",
 });
-app.use("/api", limiter);
+app.use(limiter);
 
 app.use(express.json({ limit: "10kb" })); // Prevents large payload attacks
 app.use(express.static(path.join(process.cwd(), "public"))); // Serve images
 
 // 3. ROUTES
-app.use("/api/v1/post", postRoute);
-app.use("/api/v1/user", userRoute);
+app.use("post", postRoute);
+app.use("user", userRoute);
 
 // 4. FALLBACK ROUTE (Handle 404)
 app.all("*all", (req, res, next) => {
