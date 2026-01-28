@@ -31,8 +31,8 @@ app.use(express.json({ limit: "10kb" })); // Prevents large payload attacks
 app.use(express.static(path.join(process.cwd(), "public"))); // Serve images
 
 // 3. ROUTES
-app.use("post", postRoute);
-app.use("user", userRoute);
+app.use("/post", postRoute);
+app.use("/user", userRoute);
 
 // 4. FALLBACK ROUTE (Handle 404)
 app.all("*all", (req, res, next) => {
