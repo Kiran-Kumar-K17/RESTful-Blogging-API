@@ -21,7 +21,7 @@ app.use(helmet()); // Sets various HTTP headers for security
 
 // Rate Limiter: 100 requests per hour per IP
 const limiter = rateLimit({
-  max: 10,
+  max: 100,
   windowMs: 60 * 60 * 100,
   message: "Too many requests from this IP, please try again in an hour!",
 });
