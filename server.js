@@ -11,9 +11,11 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1);
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // Your Vite dev server URL
+    origin: "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -24,7 +26,11 @@ const DB = process.env.DATABASE_URL;
 connectMongoDB(DB).then(() => console.log("MongoDB Connected Successfully"));
 
 // 2. GLOBAL MIDDLEWARES (Security & Parsing)
-app.use(helmet()); // Sets various HTTP headers for security
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 
 // Rate Limiter: 100 requests per hour per IP
 const limiter = rateLimit({

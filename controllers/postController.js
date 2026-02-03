@@ -1,10 +1,10 @@
 import multer from "multer";
 import sharp from "sharp";
+import fs from "fs"; // 1. Add this
+import path from "path"; // 2. Add this
 
-// 1. Storage: Use memory instead of disk
 const multerStorage = multer.memoryStorage();
 
-// 2. Filter: (Keep your existing filter)
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
     cb(null, true);
@@ -19,20 +19,30 @@ export const upload = multer({
 });
 
 export const resizePostImage = async (req, res, next) => {
-  // 1) If there is no file, skip to next middleware
   if (!req.file) return next();
 
-  // 2) Define the filename (we'll use .jpeg for best compression)
+  // 3. Define the absolute path to ensure Render knows where to look
+  const uploadDir = path.join(process.cwd(), "public/image/posts");
+
+  // 4. Create the folder if it's missing (The "Hero" fix)
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
   req.body.coverImage = `post-${req.user.id}-${Date.now()}.jpeg`;
 
-  // 3) Process the image
-  // req.file.buffer is available because we used memoryStorage()
-  await sharp(req.file.buffer)
-    .resize(1200, 630) // Optimized size for blog covers
-    .toFormat("jpeg")
-    .jpeg({ quality: 90 }) // Balance between quality and file size
-    .toFile(`public/image/posts/${req.body.coverImage}`);
+  try {
+    await sharp(req.file.buffer)
+      .resize(1200, 630)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(path.join(uploadDir, req.body.coverImage)); // Use the safe path
 
-  next();
+    next();
+  } catch (err) {
+    // Catch any Sharp errors specifically to prevent a full server crash
+    next(err);
+  }
 };
+
 export const uploadPostImage = upload.single("coverImage");
