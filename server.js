@@ -6,10 +6,17 @@ import { connectMongoDB } from "./MyDB.js";
 import postRoute from "./routes/post.js";
 import userRoute from "./routes/user.js";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Your Vite dev server URL
+    credentials: true,
+  }),
+);
 const PORT = process.env.PORT || 8000;
 const DB = process.env.DATABASE_URL;
 
