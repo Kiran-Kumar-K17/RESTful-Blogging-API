@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  // Your live Render URL
-  baseURL: "",
+  baseURL: "http://localhost:8000",
   headers: {
     "Content-Type": "application/json",
   },
