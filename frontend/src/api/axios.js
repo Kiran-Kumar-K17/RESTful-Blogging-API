@@ -2,7 +2,7 @@ import axios from "axios";
 
 const apiClient = axios.create({
   // Your live Render URL
-  baseURL: "https://my-blogging-api.onrender.com",
+  baseURL: "",
   headers: {
     "Content-Type": "application/json",
   },

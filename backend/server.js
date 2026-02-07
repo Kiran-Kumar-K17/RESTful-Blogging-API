@@ -15,7 +15,7 @@ app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://devcanvas-client.onrender.com"],
+    origin: ["http://localhost:5173"],
     credentials: true,
   }),
 );
@@ -29,6 +29,15 @@ connectMongoDB(DB).then(() => console.log("MongoDB Connected Successfully"));
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: ["'self'", "https://my-blogging-api.onrender.com"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
   }),
 );
 
