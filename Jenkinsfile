@@ -47,16 +47,28 @@ pipeline {
             }
         }
 
-      stage("Trivy File System Scan") {
-  steps {
-    sh '''
-      trivy --config /dev/null fs frontend backend \
-        --exit-code 1 \
-        --severity HIGH,CRITICAL \
-        --skip-dirs node_modules
-    '''
-  }
+  stage("Trivy FS Scan - Frontend") {
+    steps {
+        sh '''
+          trivy --config /dev/null fs frontend \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            --skip-dirs frontend/node_modules
+        '''
+    }
 }
+
+stage("Trivy FS Scan - Backend") {
+    steps {
+        sh '''
+          trivy --config /dev/null fs backend \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            --skip-dirs backend/node_modules
+        '''
+    }
+}
+
 
 
         stage("Build Docker Image") {
