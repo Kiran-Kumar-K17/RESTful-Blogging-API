@@ -1,5 +1,5 @@
 # ---- Stage 1: Build the React frontend ----
-FROM node:20-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 
 WORKDIR /app/frontend
 
@@ -10,7 +10,10 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---- Stage 2: Production backend ----
-FROM node:20-alpine
+FROM node:22-alpine
+
+# Update npm to latest version to get security patches
+RUN npm install -g npm@latest
 
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
