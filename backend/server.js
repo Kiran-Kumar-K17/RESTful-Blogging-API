@@ -35,7 +35,7 @@ app.use(
         connectSrc: ["'self'", "https://my-blogging-api.onrender.com"],
         scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
       },
     },
   }),
