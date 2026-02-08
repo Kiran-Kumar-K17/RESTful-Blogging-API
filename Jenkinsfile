@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         SONAR_HOME = tool "sonar"
-        IMAGE_NAME = "restful-blogging-api:latest"
+        IMAGE_NAME = "devcanvas-app:latest"
     }
     
 
