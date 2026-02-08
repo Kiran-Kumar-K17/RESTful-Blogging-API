@@ -94,13 +94,15 @@ stage("Trivy FS Scan - Backend") {
         stage('Create .env file') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'DATABASE_URL', variable: 'DATABASE_URL'),
                     string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                    string(credentialsId: 'JWT_EXPIRES_IN', variable: 'JWT_EXPIRES_IN')
                 ]) {
                     sh '''
                       cat <<EOF > .env
-DB_PASSWORD=$DB_PASSWORD
+DATABASE_URL=$DATABASE_URL
 JWT_SECRET=$JWT_SECRET
+JWT_EXPIRES_IN=$JWT_EXPIRES_IN
 PORT=8000
 EOF
                       chmod 600 .env
