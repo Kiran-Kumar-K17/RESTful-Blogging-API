@@ -217,21 +217,22 @@ EOF
         }
 
         stage("Health Check") {
-            steps {
-                script {
-                    echo "🏥 Performing health check..."
-                    retry(5) {
-                        sleep 5
-                        sh '''
-                            curl -f http://localhost:8000/health || \
-                            curl -f http://localhost:8000/ || \
-                            exit 1
-                        '''
-                    }
-                    echo "✅ Application is healthy and responding"
-                }
+        steps {
+            script {
+                echo "🏥 Performing health check..."
+                retry(5) {
+                    sleep 5
+                    sh '''
+                        # Check nginx (port 80)
+                        curl -f http://localhost:80/health || \
+                        curl -f http://localhost:80/ || \
+                        exit 1
+                    '''
             }
+            echo "✅ Application is healthy and responding"
         }
+    }
+}
     }
 
     post {
