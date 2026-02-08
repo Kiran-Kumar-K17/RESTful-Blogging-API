@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         SONAR_HOME = tool "Sonar"
+        IMAGE_NAME = "restful-blogging-api:latest"
     }
 
     stages {
@@ -51,10 +52,54 @@ pipeline {
             }
         }
 
+        stage("Build Docker Image") {
+            steps {
+                sh "docker build -t $IMAGE_NAME ."
+            }
+        }
+
+        stage("Trivy Image Scan") {
+            steps {
+                sh '''
+                  trivy --config /dev/null image \
+                    --exit-code 1 \
+                    --severity HIGH,CRITICAL \
+                    restful-blogging-api:latest
+                '''
+            }
+        }
+
+        stage('Create .env file') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                ]) {
+                    sh '''
+                      cat <<EOF > .env
+DB_PASSWORD=$DB_PASSWORD
+JWT_SECRET=$JWT_SECRET
+PORT=8000
+EOF
+                      chmod 600 .env
+                    '''
+                }
+            }
+        }
+
         stage("Deploy using Docker Compose") {
             steps {
-                sh "docker compose up -d"
+                sh '''
+                  docker compose down || true
+                  docker compose up -d
+                '''
             }
+        }
+    }
+
+    post {
+        always {
+            sh 'rm -f .env || true'
         }
     }
 }
