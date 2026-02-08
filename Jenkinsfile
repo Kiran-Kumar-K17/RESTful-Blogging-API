@@ -72,10 +72,13 @@ stage("Trivy FS Scan - Backend") {
 
 
         stage("Build Docker Image") {
-            steps {
-                sh "docker build -t $IMAGE_NAME ."
-            }
-        }
+    steps {
+        sh """
+            docker system prune -f
+            docker build --no-cache --pull -t $IMAGE_NAME .
+        """
+    }
+}
 
         stage("Trivy Image Scan") {
             steps {
