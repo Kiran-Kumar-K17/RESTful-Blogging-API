@@ -95,7 +95,7 @@ stage("Trivy FS Scan - Backend") {
             steps {
                 withCredentials([
                     string(credentialsId: 'DATABASE_URL', variable: 'DATABASE_URL'),
-                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
                     string(credentialsId: 'JWT_EXPIRES_IN', variable: 'JWT_EXPIRES_IN')
                 ]) {
                     sh '''
