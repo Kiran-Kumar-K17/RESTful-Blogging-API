@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  app:
+    image: devCanvas-app:latest
+    container_name: devCanvas_app
+    ports:
+      - "8000:8000"
+    restart: always
