@@ -190,6 +190,17 @@ EOF
             }
         }
 
+        stage("Generate SSL Certificates") {
+            steps {
+                sh '''
+                    echo "🔐 Generating SSL certificates..."
+                    chmod +x init-ssl.sh
+                    ./init-ssl.sh
+                    echo "✅ SSL certificates ready"
+                '''
+            }
+        }
+
         stage("Deploy using Docker Compose") {
             steps {
                 sh '''
@@ -217,22 +228,28 @@ EOF
         }
 
         stage("Health Check") {
-        steps {
-            script {
-                echo "🏥 Performing health check..."
-                retry(5) {
-                    sleep 5
-                    sh '''
-                        # Check nginx (port 80)
-                        curl -f http://localhost:80/health || \
-                        curl -f http://localhost:80/ || \
-                        exit 1
-                    '''
+            steps {
+                script {
+                    echo "🏥 Performing health check..."
+                    retry(5) {
+                        sleep 5
+                        sh '''
+                            # Check HTTPS (--insecure for self-signed cert)
+                            curl -fk https://localhost:443/ || exit 1
+                            
+                            # Verify HTTP redirects to HTTPS
+                            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/)
+                            if [ "$HTTP_STATUS" = "301" ]; then
+                                echo "✅ HTTP->HTTPS redirect working"
+                            else
+                                echo "⚠️ HTTP redirect returned $HTTP_STATUS"
+                            fi
+                        '''
+                    }
+                    echo "✅ Application is healthy and responding"
+                }
             }
-            echo "✅ Application is healthy and responding"
         }
-    }
-}
     }
 
     post {
@@ -267,17 +284,20 @@ EOF
                 ✅ ==========================================
                 
                 🚀 Application Details:
-                   - URL: http://${serverIp}:8000
+                   - URL: https://${serverIp}
                    - Container: devcanvas-app
                    - Image: ${LATEST_IMAGE}
                    - Build: #${BUILD_NUMBER}
                 
                 📊 Access your application:
-                   - Local: http://localhost:8000
-                   - Remote: http://${serverIp}:8000
+                   - Local: https://localhost
+                   - Remote: https://${serverIp}
+                   - (HTTP auto-redirects to HTTPS)
                 
                 📝 View logs:
-                   docker logs -f devcanvas-app
+                   docker compose logs -f
+                
+                ⚠️  Self-signed cert: accept browser warning
                 
                 ✅ ==========================================
                 """
