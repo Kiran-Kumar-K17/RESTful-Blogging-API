@@ -5,9 +5,15 @@ pipeline {
         SONAR_HOME = tool "sonar"
         IMAGE_NAME = "restful-blogging-api:latest"
     }
+    
 
     stages {
 
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
         stage("Clone Code from GitHub") {
             steps {
                 git url: "https://github.com/Kiran-Kumar-K17/RESTful-Blogging-API.git",
