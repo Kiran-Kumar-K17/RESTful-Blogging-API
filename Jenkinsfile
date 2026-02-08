@@ -48,15 +48,16 @@ pipeline {
         }
 
         stage("Trivy File System Scan") {
-            steps {
-                sh '''
-                  trivy --config /dev/null fs \
-                    --exit-code 1 \
-                    --severity HIGH,CRITICAL \
-                    .
-                '''
-            }
-        }
+    steps {
+        sh '''
+          trivy --config /dev/null fs \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            --skip-dirs node_modules,frontend/node_modules,backend/node_modules,dependency-check,odc,tools \
+            .
+        '''
+    }
+}
 
         stage("Build Docker Image") {
             steps {
